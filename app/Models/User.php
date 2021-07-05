@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,33 +10,42 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = [];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password'];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'validated_at' => 'datetime',
     ];
+
+    // 1 to n citizens
+    public function citizen()
+    {
+        return $this->belongsTo(Citizen::class);
+    }
+
+    // 1 to n submission_messages
+    public function submissionMessages()
+    {
+        return $this->hasMany(SubmissionMessage::class, 'sender_id');
+    }
+
+    // 1 to n submissions
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class, 'submitter_id');
+    }
+
+    // 1 to n submission_progresses
+    public function submissionProgresses()
+    {
+        return $this->hasMany(submissionprogress::class, 'validator_id');
+    }
+
+    // n to n procedure via procedure_validators
+    public function procedureValidators()
+    {
+        return $this->belongsToMany(Procedure::class, 'procedure_validators')->withTimestamps();
+    }
+
 }
